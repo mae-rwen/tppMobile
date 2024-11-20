@@ -1,41 +1,67 @@
 import { TextStyle, View, ViewStyle } from "react-native";
 import React from "react";
-import { Text } from "../../components";
+import { Text, Screen } from "../../components";
+import { colors, spacing } from "../../constants/theme";
+import * as Application from "expo-application";
+import { i18n } from "../../constants/i18n";
 
 const info = () => {
+  const appVersionDisplay = `${i18n.translate(
+    "infoScreen.footer.appVersion"
+  )} ${Application.nativeApplicationVersion}`;
+
   return (
-    <View style={$container}>
-      <View style={$introductionText}>
-        <Text>Tarot Psychological Portrait</Text>
-        <Text>
-          Tarot Psychological Portrait is used to examine and analyze the innate
-          potentials of a given individual, their talents and predispositions,
-          the influences they were subjected to in childhood and to which they
-          are susceptible in adult life. The best ways to realize emerging
-          opportunities, significant and turning moments in life, as well as
-          those hidden in the subconscious fears, complexes or, as it is called
-          in esoteric language - things to work through. Using the archetypes
-          written in the Major Arcana of the Tarot, substituting the appropriate
-          cards for the numbers resulting from the date of birth allows one to
-          see something like a genetic code with which a person comes into the
-          world.
-        </Text>
-        <Text>
-          This method, created by Alla Alicja Chrzanowska is taught in
-          workshops, and the meaning of each item is explained thoroughly during
-          the course.
-        </Text>
+    <Screen
+      preset="fixed"
+      safeAreaEdges={["top"]}
+      contentContainerStyle={$root}
+      style={$rootContainer}
+    >
+      <View style={$container}>
+        <Text preset="h1" tx="infoScreen.header" />
+        <View style={$infoContainer}>
+          <Text tx="infoScreen.lineOne" />
+          <Text tx="infoScreen.lineTwo" />
+        </View>
       </View>
-    </View>
+      <View style={$footer}>
+        <Text preset="xs" tx="infoScreen.footer.copyright" />
+        <Text preset="xxs" style={$appVersionTxt} text={appVersionDisplay} />
+      </View>
+    </Screen>
   );
 };
 
 export default info;
 
-const $container: ViewStyle = {
+const $root: ViewStyle = {
   flex: 1,
+  paddingTop: spacing.lg,
+  paddingBottom: spacing.sm,
+  paddingHorizontal: spacing.md,
 };
-const $introductionText: TextStyle = {
+const $rootContainer: ViewStyle = {
+  flex: 1,
+  justifyContent: "space-between",
+};
+const $container: ViewStyle = {
+  flexGrow: 1,
   alignItems: "center",
-  justifyContent: "center",
+  gap: spacing.sm,
+};
+
+const $infoContainer: ViewStyle = {
+  backgroundColor: colors.contentBox,
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.md,
+  gap: spacing.sm,
+};
+
+const $footer: ViewStyle = {
+  justifyContent: "flex-end",
+  alignItems: "center",
+  paddingHorizontal: spacing.sm,
+};
+const $appVersionTxt: TextStyle = {
+  fontWeight: "bold",
 };

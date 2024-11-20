@@ -57,8 +57,8 @@ export const colors = {
   primary: palette.main500,
   secondary: palette.secondary200,
   accent: palette.accent500,
-  text: palette.main900,
-  textDim: palette.main600,
+  text: palette.main500,
+  textDim: palette.main400,
   background: palette.secondary200,
   border: palette.accent300,
   tint: palette.main500,
@@ -69,4 +69,5 @@ export const colors = {
   successBackground: palette.success100,
   successBorder: palette.success300,
   white: palette.secondary100,
+  contentBox: palette.secondary400,
 };
