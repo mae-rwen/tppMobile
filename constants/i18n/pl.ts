@@ -3,7 +3,6 @@ import { Translations } from "./en";
 const pl: Translations = {
   common: {
     header: "Tarot App",
-    newBirthdate: "Set new birthdate",
   },
   infoScreen: {
     header: "Tarot Psychological Portrait",
@@ -15,6 +14,12 @@ const pl: Translations = {
       copyright: "© 2024 Agata R. Thrams",
       appVersion: "App-Version",
     },
+  },
+  birthdata: {
+    newBirthdate: "Set new birthdate",
+    showData: "Show data",
+    deleteData: "Delete data",
+    personName: "Who's birthdate is this?",
   },
 };
 

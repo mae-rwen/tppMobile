@@ -1,17 +1,21 @@
-import { FlatList, ImageStyle, TextStyle, View, ViewStyle } from "react-native";
+import {
+  Modal,
+  ImageStyle,
+  View,
+  ViewStyle,
+  Pressable,
+  Alert,
+  TextStyle,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { Text, Screen, TarotCard, Button } from "../components";
-import { spacing } from "../constants/theme";
+import { colors, spacing } from "../constants/theme";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import DatePicker from "../components/DatePicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomePageScreen = () => {
   const [date, setDate] = useState<Date | null>(null); // State to store the selected date
-  const [birthDate, setBirthDate] = useState<string | null>(null); // Formatted birth date (dd.mm.yyyy)
-  const [day, setDay] = useState<string | null>(null); // Day (dd)
-  const [month, setMonth] = useState<string | null>(null); // Month (mm)
-  const [year, setYear] = useState<string | null>(null); // Year (yyyy)
   const [show, setShow] = useState(false); // State to toggle the date picker visibility
   const [userCount, setUserCount] = useState(0); // Counter for unique user IDs
   const [savedUsers, setSavedUsers] = useState<
@@ -23,6 +27,7 @@ const HomePageScreen = () => {
       year: string;
     }[]
   >([]); // State to store the list of saved users
+  const [modalVisible, setModalVisible] = useState(true);
 
   const formatDate = (
     date: Date
@@ -51,21 +56,21 @@ const HomePageScreen = () => {
         ...(value ? JSON.parse(value) : {}),
       }));
       setSavedUsers(users);
+      setUserCount(users.length); // Set userCount to the number of saved users
     } catch (error) {
       console.error("Error retrieving stored data:", error);
     }
   };
 
+  useEffect(() => {
+    loadSavedUsers(); // Load users on component mount
+  }, []);
+
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShow(false); // Close the date picker
-    if (selectedDate) {
+    if (selectedDate && event.type === "set") {
       setDate(selectedDate); // Update the selected date
       const { formatted, dd, mm, yyyy } = formatDate(selectedDate); // Format the date
-      setBirthDate(formatted); // Update the formatted birth date
-      setDay(dd); // Set the day
-      setMonth(mm); // Set the month
-      setYear(yyyy); // Set the year
-
       const newUserId = `user${userCount + 1}`; // Generate unique user ID
       const birthdateData = {
         birthdate: formatted,
@@ -83,9 +88,38 @@ const HomePageScreen = () => {
     setShow(true); // Open the date picker
   };
 
-  useEffect(() => {
-    loadSavedUsers(); // Load users on component mount
-  }, []);
+  const showData = async () => {
+    try {
+      const allKeys = await AsyncStorage.getAllKeys();
+      const filteredKeys = allKeys.filter((key) => key.startsWith("user")); // Assuming user data is stored with keys starting with 'user'
+
+      if (filteredKeys.length === 0) {
+        console.log("No user birthdate data found.");
+        return;
+      }
+
+      const allData = await AsyncStorage.multiGet(filteredKeys); // Get all data for filtered keys
+      allData.forEach(([key, value]) => {
+        console.log(key, JSON.parse(value || "{}")); // Parse and log the data
+      });
+    } catch (error) {
+      console.error("Error logging birthdate data:", error);
+    }
+  };
+
+  const deleteData = async () => {
+    try {
+      const allKeys = await AsyncStorage.getAllKeys();
+      const filteredKeys = allKeys.filter((key) => key.startsWith("user")); // Assuming user data is stored with keys starting with 'user'
+      await AsyncStorage.multiRemove(filteredKeys); // Remove all user-related data
+      console.log("All user birthdate data has been removed");
+      // Triggering a re-fetch of users or reloading the component
+      setSavedUsers([]); // Clear the state (or reload the saved users if necessary)
+      setUserCount(0); // Reset the user count
+    } catch (error) {
+      console.error("Error clearing birthdate data:", error);
+    }
+  };
 
   return (
     <Screen
@@ -99,26 +133,31 @@ const HomePageScreen = () => {
           <View style={$cardContainer}>
             <TarotCard cardName="revers" imageStyle={$welcomeCard} />
           </View>
-          <View style={$buttonContainer}>
+          <View style={$newBDbtnContainer}>
             <Button
               preset="default"
-              tx="common.newBirthdate"
+              tx="birthdata.newBirthdate"
               onPress={showDatepicker} // Show date picker on button press
             />
           </View>
-          <View>
-            {savedUsers.length > 0 ? (
-              savedUsers.map((user) => (
-                <View key={user.id} style={$userItem}>
-                  <Text style={$userText}>
-                    {user.id}: {user.birthdate} (Day: {user.day}, Month:{" "}
-                    {user.month}, Year: {user.year})
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={$userText}>No users saved yet.</Text>
-            )}
+          <View style={$savedBDbtnContainer}>
+            {savedUsers.length > 0
+              ? savedUsers.map((user) => (
+                  <Button key={user.id} preset="filled" text={user.id} />
+                ))
+              : null}
+          </View>
+          <View style={$reloadBTNContainer}>
+            <Button
+              preset="default"
+              tx="birthdata.showData"
+              onPress={showData}
+            />
+            <Button
+              preset="default"
+              tx="birthdata.deleteData"
+              onPress={deleteData}
+            />
           </View>
         </View>
       </View>
@@ -130,6 +169,27 @@ const HomePageScreen = () => {
           is24Hour={true} // 24-hour format
         />
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={$modalContainer}>
+          <View style={$modalView}>
+            <Text preset="copy" tx="birthdata.personName" style={$modalText} />
+            <Button
+              text="Hide modal"
+              preset="reversed"
+              onPress={() => setModalVisible(!modalVisible)}
+            />
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 };
@@ -155,14 +215,41 @@ const $cardContainer: ViewStyle = {
 const $welcomeCard: ImageStyle = {
   height: 500,
 };
-const $buttonContainer: ViewStyle = {
-  marginVertical: spacing.md,
+const $newBDbtnContainer: ViewStyle = {
+  marginVertical: spacing.xl,
 };
-const $userItem: ViewStyle = {
-  padding: spacing.sm,
-  borderBottomWidth: 1,
-  borderBottomColor: "#ccc",
+const $savedBDbtnContainer: ViewStyle = {
+  flexDirection: "row",
+  gap: spacing.sm,
+  flexWrap: "wrap",
+  justifyContent: "center",
 };
-const $userText: TextStyle = {
-  fontSize: 16,
+const $reloadBTNContainer: ViewStyle = {
+  marginVertical: spacing.xl,
+  flexDirection: "row",
+  gap: spacing.sm,
+};
+const $modalContainer: ViewStyle = {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+};
+const $modalView: ViewStyle = {
+  backgroundColor: colors.background,
+  borderRadius: 4,
+  padding: spacing.xl,
+  alignItems: "center",
+  shadowColor: colors.accent,
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 10,
+};
+
+const $modalText: TextStyle = {
+  marginBottom: spacing.md,
+  textAlign: "center",
 };
