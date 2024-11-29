@@ -3,7 +3,7 @@ import { Translations } from "./en";
 const pl: Translations = {
   common: {
     header: "Tarot App",
-    setTheBirthdate: "Set the birthdate",
+    newBirthdate: "Set new birthdate",
   },
   infoScreen: {
     header: "Tarot Psychological Portrait",

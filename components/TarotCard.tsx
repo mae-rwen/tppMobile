@@ -4,29 +4,27 @@ import { cardRegistry } from "../assets/tarotCards/cardRegistry";
 
 interface TarotCardComponentProps {
   cardName: keyof typeof cardRegistry;
-  viewStyle?: StyleProp<ViewStyle>;
+
   imageStyle?: StyleProp<ImageStyle>;
 }
 
 export const TarotCard: React.FC<TarotCardComponentProps> = ({
   cardName,
-  viewStyle,
+
   imageStyle,
 }) => {
   const cardSource = cardRegistry[cardName];
 
   return (
-    <View style={viewStyle}>
-      <Image
-        source={cardSource}
-        style={[$imageStyle, imageStyle]}
-        resizeMode="contain"
-      />
-    </View>
+    <Image
+      source={cardSource}
+      style={imageStyle ? imageStyle : $imageStyle}
+      resizeMode="contain"
+    />
   );
 };
 
 const $imageStyle: ImageStyle = {
   width: 200,
-  // height: 300,
+  height: 300,
 };
