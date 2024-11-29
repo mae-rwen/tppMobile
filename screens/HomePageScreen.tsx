@@ -27,7 +27,7 @@ const HomePageScreen = () => {
       year: string;
     }[]
   >([]); // State to store the list of saved users
-  const [modalVisible, setModalVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const formatDate = (
     date: Date
@@ -81,6 +81,7 @@ const HomePageScreen = () => {
       saveUserBirthdate(newUserId, birthdateData); // Save to AsyncStorage
       setUserCount(userCount + 1); // Increment the user counter
       loadSavedUsers(); // Reload the list of saved users
+      setModalVisible(!modalVisible);
     }
   };
 
