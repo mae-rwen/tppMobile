@@ -7,7 +7,7 @@ import {
   TextStyle,
   Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, Screen, TarotCard, Button } from "../components";
 import { colors, spacing } from "../constants/theme";
 import * as i18n from "../constants/i18n";
@@ -22,6 +22,28 @@ const HomePageScreen = () => {
   const [date, setDate] = useState<Date>(new Date());
 
   const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
+
+  const fetchTPPData = async () => {
+    try {
+      const existingTPPData = await AsyncStorage.getItem("tppData");
+      if (existingTPPData) {
+        const parsedData = JSON.parse(existingTPPData);
+        console.log("Existing TPP Data:", parsedData);
+        // Example: Loop through and log each entry
+        Object.entries(parsedData).forEach(([key, value]) => {
+          console.log(`${key}`, value);
+        });
+      } else {
+        console.log("No existing TPP data found.");
+      }
+    } catch (error) {
+      console.error("Error fetching TPP data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTPPData();
+  }, []);
 
   const proceedWithName = () => {
     setModalVisible(!modalVisible);
