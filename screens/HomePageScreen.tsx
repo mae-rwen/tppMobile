@@ -1,33 +1,39 @@
 import {
+  TextInput,
   Modal,
   ImageStyle,
   View,
   ViewStyle,
-  Pressable,
-  Alert,
   TextStyle,
+  Dimensions,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Text, Screen, TarotCard, Button } from "../components";
 import { colors, spacing } from "../constants/theme";
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import * as i18n from "../constants/i18n";
 import DatePicker from "../components/DatePicker";
+import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomePageScreen = () => {
-  const [date, setDate] = useState<Date | null>(null); // State to store the selected date
-  const [show, setShow] = useState(false); // State to toggle the date picker visibility
-  const [userCount, setUserCount] = useState(0); // Counter for unique user IDs
-  const [savedUsers, setSavedUsers] = useState<
-    {
-      id: string;
-      birthdate: string;
-      day: string;
-      month: string;
-      year: string;
-    }[]
-  >([]); // State to store the list of saved users
-  const [modalVisible, setModalVisible] = useState(false);
+  const [inputTxt, setInputTxt] = useState<string>("");
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false);
+  const [date, setDate] = useState<Date>(new Date());
+
+  const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
+
+  const proceedWithName = () => {
+    setModalVisible(!modalVisible);
+    // console.log(`Proceed with name of ${inputTxt}`);
+    setDatePickerVisible(true);
+  };
+  const proceedWithoutName = () => {
+    setInputTxt("");
+    setModalVisible(!modalVisible);
+    console.log(`Proceed without name`);
+    setDatePickerVisible(true);
+  };
 
   const formatDate = (
     date: Date
@@ -38,88 +44,45 @@ const HomePageScreen = () => {
     return { formatted: `${dd}.${mm}.${yyyy}`, dd, mm, yyyy };
   };
 
-  const saveUserBirthdate = async (userId: string, birthdateData: object) => {
+  const saveNewTPP = async (
+    name: string,
+    birthdateData: { formatted: string; dd: string; mm: string; yyyy: string }
+  ) => {
     try {
-      await AsyncStorage.setItem(userId, JSON.stringify(birthdateData));
-      console.log(`Saved ${userId}:`, birthdateData);
-    } catch (error) {
-      console.error("Error saving birthdate:", error);
-    }
-  };
+      // Fetch existing data from AsyncStorage
+      const existingTPPData = await AsyncStorage.getItem("tppData");
+      const parsedData = existingTPPData ? JSON.parse(existingTPPData) : {};
 
-  const loadSavedUsers = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const allData = await AsyncStorage.multiGet(allKeys);
-      const users = allData.map(([key, value]) => ({
-        id: key,
-        ...(value ? JSON.parse(value) : {}),
-      }));
-      setSavedUsers(users);
-      setUserCount(users.length); // Set userCount to the number of saved users
-    } catch (error) {
-      console.error("Error retrieving stored data:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadSavedUsers(); // Load users on component mount
-  }, []);
-
-  const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    setShow(false); // Close the date picker
-    if (selectedDate && event.type === "set") {
-      setDate(selectedDate); // Update the selected date
-      const { formatted, dd, mm, yyyy } = formatDate(selectedDate); // Format the date
-      const newUserId = `user${userCount + 1}`; // Generate unique user ID
-      const birthdateData = {
-        birthdate: formatted,
-        day: dd,
-        month: mm,
-        year: yyyy,
+      // Add new user data
+      parsedData[name] = {
+        birthdate: birthdateData.formatted,
+        day: birthdateData.dd,
+        month: birthdateData.mm,
+        year: birthdateData.yyyy,
       };
-      saveUserBirthdate(newUserId, birthdateData); // Save to AsyncStorage
-      setUserCount(userCount + 1); // Increment the user counter
-      loadSavedUsers(); // Reload the list of saved users
-      setModalVisible(!modalVisible);
-    }
-  };
 
-  const showDatepicker = () => {
-    setShow(true); // Open the date picker
-  };
+      // Save updated data back to AsyncStorage
+      await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
 
-  const showData = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const filteredKeys = allKeys.filter((key) => key.startsWith("user")); // Assuming user data is stored with keys starting with 'user'
-
-      if (filteredKeys.length === 0) {
-        console.log("No user birthdate data found.");
-        return;
-      }
-
-      const allData = await AsyncStorage.multiGet(filteredKeys); // Get all data for filtered keys
-      allData.forEach(([key, value]) => {
-        console.log(key, JSON.parse(value || "{}")); // Parse and log the data
-      });
+      // Log the saved data for debugging
+      console.log("Updated TPP data:", parsedData);
     } catch (error) {
-      console.error("Error logging birthdate data:", error);
+      console.error("Error saving TPP data:", error);
     }
   };
 
-  const deleteData = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const filteredKeys = allKeys.filter((key) => key.startsWith("user")); // Assuming user data is stored with keys starting with 'user'
-      await AsyncStorage.multiRemove(filteredKeys); // Remove all user-related data
-      console.log("All user birthdate data has been removed");
-      // Triggering a re-fetch of users or reloading the component
-      setSavedUsers([]); // Clear the state (or reload the saved users if necessary)
-      setUserCount(0); // Reset the user count
-    } catch (error) {
-      console.error("Error clearing birthdate data:", error);
+  const onDateChange = async (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
+    if (selectedDate && event.type === "set") {
+      setDate(selectedDate);
+      const formattedDate = formatDate(selectedDate);
+      saveNewTPP(inputTxt, formattedDate);
+      setInputTxt("");
+      setDate(new Date());
     }
+    setDatePickerVisible(!datePickerVisible);
   };
 
   return (
@@ -134,74 +97,74 @@ const HomePageScreen = () => {
           <View style={$cardContainer}>
             <TarotCard cardName="revers" imageStyle={$welcomeCard} />
           </View>
-          <View style={$newBDbtnContainer}>
+          <View style={$btnContainer}>
             <Button
               preset="default"
-              tx="birthdata.newBirthdate"
-              onPress={showDatepicker} // Show date picker on button press
-            />
-          </View>
-          <View style={$savedBDbtnContainer}>
-            {savedUsers.length > 0
-              ? savedUsers.map((user) => (
-                  <Button key={user.id} preset="filled" text={user.id} />
-                ))
-              : null}
-          </View>
-          <View style={$reloadBTNContainer}>
-            <Button
-              preset="default"
-              tx="birthdata.showData"
-              onPress={showData}
-            />
-            <Button
-              preset="default"
-              tx="birthdata.deleteData"
-              onPress={deleteData}
+              tx="newTPP.setNewPortrait"
+              onPress={() => setModalVisible(true)}
             />
           </View>
         </View>
       </View>
-      {show && (
-        <DatePicker
-          value={date || new Date()} // Pass the current date (default to today if none is selected)
-          onChange={onChange} // Handle date selection
-          mode="date" // Set mode to "date" only
-          is24Hour={true} // 24-hour format
-        />
-      )}
 
+      {/* Modal for TPP name input */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
         }}
       >
         <View style={$modalContainer}>
           <View style={$modalView}>
-            <Text preset="copy" tx="birthdata.personName" style={$modalText} />
-            <Button
-              text="Hide modal"
-              preset="reversed"
-              onPress={() => setModalVisible(!modalVisible)}
+            <Text preset="copy" tx="newTPP.modalText" style={$modalText} />
+            <TextInput
+              style={$txtInput}
+              onChangeText={setInputTxt}
+              value={inputTxt}
+              textAlign="center"
+              placeholder={modalPlaceholder}
+              placeholderTextColor={colors.palette.accent300}
             />
+            <View style={$modalBtns}>
+              <Button
+                tx="newTPP.proceedWithSaving"
+                preset="filled"
+                onPress={proceedWithName}
+                style={{ width: 100 }}
+              />
+              <Button
+                tx="newTPP.proceedWitouthSaving"
+                preset="default"
+                onPress={proceedWithoutName}
+                style={{ width: 100 }}
+                disabled
+              />
+            </View>
           </View>
         </View>
       </Modal>
+
+      {/* DatePicker Modal */}
+
+      {datePickerVisible && (
+        <DatePicker value={date} onChange={onDateChange} mode="date" />
+      )}
     </Screen>
   );
 };
 
 export default HomePageScreen;
 
+const width = Dimensions.get("window").width;
+
 const $root: ViewStyle = {
   paddingTop: spacing.lg,
   paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.md,
 };
+
 const $container: ViewStyle = {
   alignItems: "center",
   gap: spacing.sm,
@@ -213,28 +176,21 @@ const $contentContainer: ViewStyle = {
 const $cardContainer: ViewStyle = {
   alignItems: "center",
 };
+
 const $welcomeCard: ImageStyle = {
   height: 500,
 };
-const $newBDbtnContainer: ViewStyle = {
+
+const $btnContainer: ViewStyle = {
   marginVertical: spacing.xl,
 };
-const $savedBDbtnContainer: ViewStyle = {
-  flexDirection: "row",
-  gap: spacing.sm,
-  flexWrap: "wrap",
-  justifyContent: "center",
-};
-const $reloadBTNContainer: ViewStyle = {
-  marginVertical: spacing.xl,
-  flexDirection: "row",
-  gap: spacing.sm,
-};
+
 const $modalContainer: ViewStyle = {
   flex: 1,
   justifyContent: "center",
   alignItems: "center",
 };
+
 const $modalView: ViewStyle = {
   backgroundColor: colors.background,
   borderRadius: 4,
@@ -248,9 +204,27 @@ const $modalView: ViewStyle = {
   shadowOpacity: 0.25,
   shadowRadius: 4,
   elevation: 10,
+  gap: spacing.xl,
+  width: width * 0.8,
 };
-
 const $modalText: TextStyle = {
-  marginBottom: spacing.md,
+  //  marginVertical: spacing.xl,
   textAlign: "center",
+};
+const $modalBtns: ViewStyle = {
+  flexDirection: "row",
+  //  / gap: spacing.lg,
+  width: "100%",
+  justifyContent: "space-evenly",
+};
+const $txtInput: ViewStyle = {
+  height: 56,
+  width: "100%",
+  padding: spacing.sm,
+  borderWidth: 1,
+  borderColor: colors.palette.accent300,
+  borderRadius: 4,
+  justifyContent: "center",
+  alignItems: "center",
+  //  marginBottom: spacing.xl,
 };

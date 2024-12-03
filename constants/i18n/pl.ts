@@ -19,7 +19,17 @@ const pl: Translations = {
     newBirthdate: "Set new birthdate",
     showData: "Show data",
     deleteData: "Delete data",
-    personName: "Who's birthdate is this?",
+    personName: "Who will be the Portrait be for?",
+    modalPlaceholder: "Person's name",
+    proceed: "Proceed",
+    noName: "Proceed w/o profile",
+  },
+  newTPP: {
+    setNewPortrait: "Set new Portrait",
+    modalText: "Who will the be Portrait be for?",
+    modalPlaceholder: "Name for the Portrait",
+    proceedWithSaving: "Save and proceed",
+    proceedWitouthSaving: "Proceed without saving",
   },
 };
 
