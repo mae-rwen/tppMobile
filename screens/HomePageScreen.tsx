@@ -15,24 +15,42 @@ import DatePicker from "../components/DatePicker";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Define types for TPP data
+type TPPDetails = {
+  birthdate: string;
+  day: string;
+  month: string;
+  year: string;
+};
+
+type TPPData = Record<string, TPPDetails>;
+
 const HomePageScreen = () => {
   const [inputTxt, setInputTxt] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false);
   const [date, setDate] = useState<Date>(new Date());
+  const [savedTPPData, setSavedTPPData] = useState<
+    { name: string; details: TPPDetails }[]
+  >([]);
 
   const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
 
+  // Fetch existing TPP data
   const fetchTPPData = async () => {
     try {
       const existingTPPData = await AsyncStorage.getItem("tppData");
       if (existingTPPData) {
-        const parsedData = JSON.parse(existingTPPData);
-        console.log("Existing TPP Data:", parsedData);
-        // Example: Loop through and log each entry
-        Object.entries(parsedData).forEach(([key, value]) => {
-          console.log(`${key}`, value);
-        });
+        const parsedData: TPPData = JSON.parse(existingTPPData);
+
+        // Map data into a format suitable for rendering
+        const formattedData = Object.entries(parsedData).map(
+          ([name, details]) => ({
+            name,
+            details,
+          })
+        );
+        setSavedTPPData(formattedData);
       } else {
         console.log("No existing TPP data found.");
       }
@@ -71,11 +89,9 @@ const HomePageScreen = () => {
     birthdateData: { formatted: string; dd: string; mm: string; yyyy: string }
   ) => {
     try {
-      // Fetch existing data from AsyncStorage
       const existingTPPData = await AsyncStorage.getItem("tppData");
       const parsedData = existingTPPData ? JSON.parse(existingTPPData) : {};
 
-      // Add new user data
       parsedData[name] = {
         birthdate: birthdateData.formatted,
         day: birthdateData.dd,
@@ -83,11 +99,8 @@ const HomePageScreen = () => {
         year: birthdateData.yyyy,
       };
 
-      // Save updated data back to AsyncStorage
       await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
-
-      // Log the saved data for debugging
-      console.log("Updated TPP data:", parsedData);
+      fetchTPPData(); // Refresh displayed data
     } catch (error) {
       console.error("Error saving TPP data:", error);
     }
@@ -107,6 +120,33 @@ const HomePageScreen = () => {
     setDatePickerVisible(!datePickerVisible);
   };
 
+  const showData = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem("tppData");
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        //  console.log("All TPP data:", parsedData);
+        Object.entries(parsedData).forEach(([name, details]) => {
+          console.log(`Name: ${name}, Details:`, details);
+        });
+      } else {
+        console.log("No TPP data found.");
+      }
+    } catch (error) {
+      console.error("Error showing TPP data:", error);
+    }
+  };
+
+  const deleteData = async () => {
+    try {
+      await AsyncStorage.removeItem("tppData"); // Remove the stored TPP data
+      console.log("All TPP data has been removed.");
+      setSavedTPPData([]); // Clear the state
+    } catch (error) {
+      console.error("Error deleting TPP data:", error);
+    }
+  };
+
   return (
     <Screen
       preset="scroll"
@@ -124,6 +164,30 @@ const HomePageScreen = () => {
               preset="default"
               tx="newTPP.setNewPortrait"
               onPress={() => setModalVisible(true)}
+            />
+          </View>
+          <View style={$savedDataBtnContainer}>
+            {savedTPPData.length > 0
+              ? savedTPPData.map((data, index) => (
+                  <Button
+                    key={index}
+                    preset="filled"
+                    text={`${data.name} - ${data.details.birthdate}`}
+                    onPress={() =>
+                      console.log(`Details for ${data.name}:`, data.details)
+                    }
+                  />
+                ))
+              : null}
+            <Button
+              preset="default"
+              tx="birthdata.showData"
+              onPress={showData}
+            />
+            <Button
+              preset="default"
+              tx="birthdata.deleteData"
+              onPress={deleteData}
             />
           </View>
         </View>
@@ -205,6 +269,13 @@ const $welcomeCard: ImageStyle = {
 
 const $btnContainer: ViewStyle = {
   marginVertical: spacing.xl,
+};
+
+const $savedDataBtnContainer: ViewStyle = {
+  flexDirection: "row",
+  gap: spacing.sm,
+  flexWrap: "wrap",
+  justifyContent: "center",
 };
 
 const $modalContainer: ViewStyle = {
