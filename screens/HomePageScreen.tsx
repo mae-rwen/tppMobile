@@ -87,11 +87,12 @@ const HomePageScreen = () => {
   const saveNewTPP = async (
     name: string,
     birthdateData: { formatted: string; dd: string; mm: string; yyyy: string }
-  ) => {
+  ): Promise<{ name: string; details: TPPDetails } | null> => {
     try {
       const existingTPPData = await AsyncStorage.getItem("tppData");
       const parsedData = existingTPPData ? JSON.parse(existingTPPData) : {};
 
+      // Add new user data
       parsedData[name] = {
         birthdate: birthdateData.formatted,
         day: birthdateData.dd,
@@ -99,10 +100,17 @@ const HomePageScreen = () => {
         year: birthdateData.yyyy,
       };
 
+      // Save updated data back to AsyncStorage
       await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
-      fetchTPPData(); // Refresh displayed data
+
+      // Return only the new TPP data
+      return {
+        name,
+        details: parsedData[name],
+      };
     } catch (error) {
       console.error("Error saving TPP data:", error);
+      return null;
     }
   };
 
@@ -113,7 +121,17 @@ const HomePageScreen = () => {
     if (selectedDate && event.type === "set") {
       setDate(selectedDate);
       const formattedDate = formatDate(selectedDate);
-      saveNewTPP(inputTxt, formattedDate);
+
+      // Save the new TPP and retrieve the newest data
+      const newestTPP = await saveNewTPP(inputTxt, formattedDate);
+
+      if (newestTPP) {
+        console.log("Newest saved TPP data:", newestTPP);
+
+        // Add the newest data to the existing savedTPPData state
+        setSavedTPPData((prevData) => [...prevData, newestTPP]);
+      }
+
       setInputTxt("");
       setDate(new Date());
     }
