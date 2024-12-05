@@ -15,11 +15,12 @@ const TabsLayout = () => {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           headerTitle: "Home",
           title: "Home",
           headerShown: false,
+
           tabBarIcon: ({ focused }) => {
             const IconComponent = focused
               ? IconsSolid.SparklesIcon
@@ -34,6 +35,7 @@ const TabsLayout = () => {
           headerTitle: "Info",
           title: "Info",
           headerShown: false,
+
           tabBarIcon: ({ focused }) => {
             const IconComponent = focused
               ? IconsSolid.InformationCircleIcon

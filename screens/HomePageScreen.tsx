@@ -14,6 +14,8 @@ import * as i18n from "../constants/i18n";
 import DatePicker from "../components/DatePicker";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 // Define types for TPP data
 type TPPDetails = {
@@ -33,6 +35,8 @@ const HomePageScreen = () => {
   const [savedTPPData, setSavedTPPData] = useState<
     { name: string; details: TPPDetails }[]
   >([]);
+
+  const router = useRouter();
 
   const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
 
@@ -206,6 +210,14 @@ const HomePageScreen = () => {
               preset="default"
               tx="birthdata.deleteData"
               onPress={deleteData}
+            />
+
+            <Button
+              preset="reversed"
+              text=">>"
+              onPress={() => {
+                router.push("/tpp");
+              }}
             />
           </View>
         </View>

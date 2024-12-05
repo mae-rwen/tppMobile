@@ -16,13 +16,8 @@ const pl: Translations = {
     },
   },
   birthdata: {
-    newBirthdate: "Set new birthdate",
     showData: "Show data",
     deleteData: "Delete data",
-    personName: "Who will be the Portrait be for?",
-    modalPlaceholder: "Person's name",
-    proceed: "Proceed",
-    noName: "Proceed w/o profile",
   },
   newTPP: {
     setNewPortrait: "Set new Portrait",
@@ -30,6 +25,9 @@ const pl: Translations = {
     modalPlaceholder: "Name for the Portrait",
     proceedWithSaving: "Save and proceed",
     proceedWitouthSaving: "Proceed without saving",
+  },
+  tpp: {
+    header: "Tarot Psychological Portrait",
   },
 };
 
