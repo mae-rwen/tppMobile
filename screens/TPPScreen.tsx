@@ -1,6 +1,6 @@
-import { View, ViewStyle } from "react-native";
+import { Dimensions, ImageStyle, View, ViewStyle } from "react-native";
 import React from "react";
-import { Screen, Text } from "../components";
+import { Screen, TarotCard, Text } from "../components";
 import { spacing } from "../constants/theme";
 
 const TPPScreen = () => {
@@ -10,9 +10,28 @@ const TPPScreen = () => {
       safeAreaEdges={["top"]}
       contentContainerStyle={$root}
     >
-      <View style={$container}></View>
-      <View style={$contentContainer}>
-        <Text tx="tpp.header" />
+      <View style={$container}>
+        <View style={$lifeCardContainer}>
+          <TarotCard cardName="revers" />
+        </View>
+        <View style={$lifeGridContainer}>
+          <View style={$lifeGridUp}>
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+          </View>
+          <View style={$lifeGrid1}>
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+          </View>
+          <View style={$lifeGrid2}>
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+          </View>
+          <View style={$lifeGrid3}>
+            <TarotCard cardName="revers" imageStyle={$gridCard} />
+          </View>
+        </View>
       </View>
     </Screen>
   );
@@ -20,18 +39,35 @@ const TPPScreen = () => {
 
 export default TPPScreen;
 
+const width = Dimensions.get("window").width;
+
 const $root: ViewStyle = {
-  // paddingTop: spacing.lg,
   paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.md,
 };
 
-const $container: ViewStyle = {
+const $container: ViewStyle = { gap: spacing.sm };
+const $lifeCardContainer: ViewStyle = {
   alignItems: "center",
-  gap: spacing.sm,
+  marginBottom: spacing.xxl,
 };
 
-const $contentContainer: ViewStyle = {
-  flexGrow: 1,
-  alignItems: "center",
+const $lifeGridContainer: ViewStyle = { gap: spacing.md };
+const $gridCard: ImageStyle = { height: 100, width: 100 };
+
+const $lifeGridUp: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-between",
+};
+const $lifeGrid1: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-around",
+};
+const $lifeGrid2: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-evenly",
+};
+const $lifeGrid3: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "center",
 };
