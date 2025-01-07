@@ -1,5 +1,5 @@
 import { Dimensions, ImageStyle, View, ViewStyle } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Screen, TarotCard, Text } from "../components";
 import { spacing } from "../constants/theme";
 import { useLocalSearchParams } from "expo-router";
@@ -7,6 +7,32 @@ import { useLocalSearchParams } from "expo-router";
 const TPPScreen = () => {
   const { user } = useLocalSearchParams();
   const userData = user ? JSON.parse(user as string) : null;
+
+  const [lifeCard, setLifeCard] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (userData?.details?.birthdate) {
+      const birthdate = userData.details.birthdate; // Format: DD.MM.YYYY
+      console.log("Birthdate:", birthdate);
+
+      // Split the birthdate into digits
+      const digits = birthdate.replace(/\D/g, "").split("").map(Number);
+      console.log("Digits from birthdate:", digits);
+
+      // Sum the digits
+      let sum = digits.reduce((acc, num) => acc + num, 0);
+      console.log("Sum of digits:", sum);
+
+      // Reduce sum to 22 or below
+      while (sum > 22) {
+        sum -= 22;
+        console.log("After subtracting 22:", sum);
+      }
+
+      console.log("Final result:", sum);
+      setLifeCard(sum); // Store the result in state
+    }
+  }, [userData]);
 
   return (
     <Screen
