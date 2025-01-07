@@ -16,6 +16,8 @@ const TPPScreen = () => {
     >
       <View style={$container}>
         <View style={$lifeCardContainer}>
+          <Text preset="h2" text={userData?.name} />
+          <Text preset="h2regular" text={userData?.details.birthdate} />
           <TarotCard cardName="revers" />
         </View>
         <View style={$lifeGridContainer}>
@@ -52,6 +54,7 @@ const $root: ViewStyle = {
 
 const $container: ViewStyle = { gap: spacing.sm };
 const $lifeCardContainer: ViewStyle = {
+  gap: spacing.xxs,
   alignItems: "center",
   marginBottom: spacing.xxl,
 };
