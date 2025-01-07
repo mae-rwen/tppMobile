@@ -195,9 +195,13 @@ const HomePageScreen = () => {
                     key={index}
                     preset="filled"
                     text={`${data.name} - ${data.details.birthdate}`}
-                    onPress={() =>
-                      console.log(`Details for ${data.name}:`, data.details)
-                    }
+                    onPress={() => {
+                      console.log(`Details for ${data.name}:`, data.details);
+                      router.push({
+                        pathname: "/tpp",
+                        params: { user: JSON.stringify(data) },
+                      });
+                    }}
                   />
                 ))
               : null}

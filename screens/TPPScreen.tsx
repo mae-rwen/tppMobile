@@ -2,8 +2,12 @@ import { Dimensions, ImageStyle, View, ViewStyle } from "react-native";
 import React from "react";
 import { Screen, TarotCard, Text } from "../components";
 import { spacing } from "../constants/theme";
+import { useLocalSearchParams } from "expo-router";
 
 const TPPScreen = () => {
+  const { user } = useLocalSearchParams();
+  const userData = user ? JSON.parse(user as string) : null;
+
   return (
     <Screen
       preset="scroll"
