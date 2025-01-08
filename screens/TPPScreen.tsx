@@ -60,8 +60,9 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
   const card4Number = adjustCardNumber(card1Number + card2Number);
   const card5Number = adjustCardNumber(card2Number + card3Number);
   const card6Number = adjustCardNumber(card5Number + card4Number);
-  // const card7Number = adjustCardNumber(card2Number + card3Number);
-  // const card8Number = adjustCardNumber(card2Number + card3Number);
+  const card7Number = adjustCardNumber(card1Number + card5Number);
+  const card8Number = adjustCardNumber(card2Number + card6Number);
+  const card12Number = adjustCardNumber(card7Number + card8Number);
   const card13Number = adjustCardNumber(
     card1Number + card4Number + card6Number
   );
@@ -76,8 +77,9 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
   const card4 = cardMap[card4Number - 1];
   const card5 = cardMap[card5Number - 1];
   const card6 = cardMap[card6Number - 1];
-  // const card7 = cardMap[card7Number - 1];
-  // const card8 = cardMap[card8Number - 1];
+  const card7 = cardMap[card7Number - 1];
+  const card8 = cardMap[card8Number - 1];
+  const card12 = cardMap[card12Number - 1];
   const card13 = cardMap[card13Number - 1];
   const card14 = cardMap[card14Number - 1];
 
@@ -89,8 +91,9 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
     card4,
     card5,
     card6,
-    // card7,
-    // card8,
+    card7,
+    card8,
+    card12,
     card13,
     card14,
   };
@@ -107,7 +110,10 @@ const TPPScreen = () => {
   const [card4, setCard4] = useState<CardName>("revers");
   const [card5, setCard5] = useState<CardName>("revers");
   const [card6, setCard6] = useState<CardName>("revers");
+  const [card7, setCard7] = useState<CardName>("revers");
+  const [card8, setCard8] = useState<CardName>("revers");
   const [card13, setCard13] = useState<CardName>("revers");
+  const [card12, setCard12] = useState<CardName>("revers");
   const [card14, setCard14] = useState<CardName>("revers");
 
   useEffect(() => {
@@ -121,6 +127,9 @@ const TPPScreen = () => {
         card4,
         card5,
         card6,
+        card7,
+        card8,
+        card12,
         card13,
         card14,
       } = calculateTarotCards(day, month, year);
@@ -132,6 +141,9 @@ const TPPScreen = () => {
       setCard4(card4);
       setCard5(card5);
       setCard6(card6);
+      setCard7(card7);
+      setCard8(card8);
+      setCard12(card12);
       setCard13(card13);
       setCard14(card14);
     }
@@ -152,45 +164,63 @@ const TPPScreen = () => {
             <Text preset="xs" text="Life Card" />
           </View>
         </View>
-        <View style={$lifeGridContainer}>
-          <View style={$lifeGridUp}>
-            <View style={$cardView}>
-              <TarotCard cardName={card13} imageStyle={$gridCard} />
-              <Text preset="xs" text="p13" />
+        <View style={$gridContainer}>
+          <View style={$mainGridContainer}>
+            <View style={$gridRowUp}>
+              <View style={$cardView}>
+                <TarotCard cardName={card13} imageStyle={$gridCard} />
+                <Text preset="xs" text="p13" />
+              </View>
+              <View style={$cardView}>
+                <TarotCard cardName={card14} imageStyle={$gridCard} />
+                <Text preset="xs" text="p14" />
+              </View>
             </View>
-            <View style={$cardView}>
-              <TarotCard cardName={card14} imageStyle={$gridCard} />
-              <Text preset="xs" text="p14" />
+            <View style={$gridRow1}>
+              <View style={$cardView}>
+                <TarotCard cardName={card1} imageStyle={$gridCard} />
+                <Text preset="xs" text="p1" />
+              </View>
+              <View style={$cardView}>
+                <TarotCard cardName={card2} imageStyle={$gridCard} />
+                <Text preset="xs" text="p2" />
+              </View>
+              <View style={$cardView}>
+                <TarotCard cardName={card3} imageStyle={$gridCard} />
+                <Text preset="xs" text="p3" />
+              </View>
+            </View>
+            <View style={$gridRow2}>
+              <View style={$cardView}>
+                <TarotCard cardName={card4} imageStyle={$gridCard} />
+                <Text preset="xs" text="p4" />
+              </View>
+              <View style={$cardView}>
+                <TarotCard cardName={card5} imageStyle={$gridCard} />
+                <Text preset="xs" text="p5" />
+              </View>
+            </View>
+            <View style={$gridRow3}>
+              <View style={$cardView}>
+                <TarotCard cardName={card6} imageStyle={$gridCard} />
+                <Text preset="xs" text="p6" />
+              </View>
+            </View>
+            <View style={$gridRow4}>
+              <View style={$cardView}>
+                <TarotCard cardName={card8} imageStyle={$gridCard} />
+                <Text preset="xs" text="p8" />
+              </View>
             </View>
           </View>
-          <View style={$lifeGrid1}>
+          <View style={$secondGridContainer}>
             <View style={$cardView}>
-              <TarotCard cardName={card1} imageStyle={$gridCard} />
-              <Text preset="xs" text="p1" />
+              <TarotCard cardName={card7} imageStyle={$gridCard} />
+              <Text preset="xs" text="p7" />
             </View>
             <View style={$cardView}>
-              <TarotCard cardName={card2} imageStyle={$gridCard} />
-              <Text preset="xs" text="p2" />
-            </View>
-            <View style={$cardView}>
-              <TarotCard cardName={card3} imageStyle={$gridCard} />
-              <Text preset="xs" text="p3" />
-            </View>
-          </View>
-          <View style={$lifeGrid2}>
-            <View style={$cardView}>
-              <TarotCard cardName={card4} imageStyle={$gridCard} />
-              <Text preset="xs" text="p4" />
-            </View>
-            <View style={$cardView}>
-              <TarotCard cardName={card5} imageStyle={$gridCard} />
-              <Text preset="xs" text="p5" />
-            </View>
-          </View>
-          <View style={$lifeGrid3}>
-            <View style={$cardView}>
-              <TarotCard cardName={card6} imageStyle={$gridCard} />
-              <Text preset="xs" text="p6" />
+              <TarotCard cardName={card12} imageStyle={$gridCard} />
+              <Text preset="xs" text="p12" />
             </View>
           </View>
         </View>
@@ -218,22 +248,34 @@ const $lifeCardContainer: ViewStyle = {
 };
 const $lifeCard: ImageStyle = { height: 200, width: 200 };
 
-const $lifeGridContainer: ViewStyle = { gap: spacing.md };
+const $gridContainer: ViewStyle = { flexDirection: "row" };
+const $mainGridContainer: ViewStyle = { gap: spacing.md };
 const $gridCard: ImageStyle = { height: 100, width: 100 };
 
-const $lifeGridUp: ViewStyle = {
+const $gridRowUp: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
 };
-const $lifeGrid1: ViewStyle = {
+const $gridRow1: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-around",
 };
-const $lifeGrid2: ViewStyle = {
+const $gridRow2: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-evenly",
 };
-const $lifeGrid3: ViewStyle = {
+
+const $gridRow3: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
+};
+const $gridRow4: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "center",
+};
+
+const $secondGridContainer: ViewStyle = {
+  paddingTop: spacing.xxxl,
+  gap: spacing.md,
+  justifyContent: "space-evenly",
 };
