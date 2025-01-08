@@ -35,6 +35,7 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
 
   const adjustCardNumber = (num: number) => {
     while (num > 22) num -= 22;
+    num === 0 ? (num = 22) : num;
     return num;
   };
 
