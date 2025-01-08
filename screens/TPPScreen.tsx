@@ -3,12 +3,38 @@ import React, { useEffect, useState } from "react";
 import { Screen, TarotCard, Text } from "../components";
 import { spacing } from "../constants/theme";
 import { useLocalSearchParams } from "expo-router";
+import { cardRegistry } from "../assets/tarotCards/cardRegistry";
+
+const cardMap: (keyof typeof cardRegistry)[] = [
+  "magician", // 1
+  "priestess", // 2
+  "empress", // 3
+  "emperor", // 4
+  "hierophant", // 5
+  "lovers", // 6
+  "chariot", // 7
+  "justice", // 8
+  "hermit", // 9
+  "fortune", // 10
+  "strenght", // 11
+  "hanged", // 12
+  "death", // 13
+  "temperance", // 14
+  "devil", // 15
+  "tower", // 16
+  "star", // 17
+  "moon", // 18
+  "sun", // 19
+  "judgement", // 20
+  "world", // 21
+  "fool", // 22
+];
 
 const TPPScreen = () => {
   const { user } = useLocalSearchParams();
   const userData = user ? JSON.parse(user as string) : null;
 
-  const [lifeCard, setLifeCard] = useState<number | null>(null);
+  const [lifeCardNumber, setLifeCardNumber] = useState<number | null>(null);
 
   useEffect(() => {
     if (userData?.details?.birthdate) {
@@ -30,9 +56,14 @@ const TPPScreen = () => {
       }
 
       console.log("Final result:", sum);
-      setLifeCard(sum); // Store the result in state
+      setLifeCardNumber(sum); // Store the result in state
     }
   }, [userData]);
+
+  // Determine the card name based on lifeCardNumber
+  const lifeCardName: keyof typeof cardRegistry = lifeCardNumber
+    ? cardMap[lifeCardNumber - 1]
+    : "revers";
 
   return (
     <Screen
@@ -44,7 +75,7 @@ const TPPScreen = () => {
         <View style={$lifeCardContainer}>
           <Text preset="h2" text={userData?.name} />
           <Text preset="h2regular" text={userData?.details.birthdate} />
-          <TarotCard cardName="revers" />
+          <TarotCard cardName={lifeCardName} />
         </View>
         <View style={$lifeGridContainer}>
           <View style={$lifeGridUp}>
