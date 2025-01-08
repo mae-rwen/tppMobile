@@ -5,65 +5,99 @@ import { spacing } from "../constants/theme";
 import { useLocalSearchParams } from "expo-router";
 import { cardRegistry } from "../assets/tarotCards/cardRegistry";
 
-const cardMap: (keyof typeof cardRegistry)[] = [
-  "magician", // 1
-  "priestess", // 2
-  "empress", // 3
-  "emperor", // 4
-  "hierophant", // 5
-  "lovers", // 6
-  "chariot", // 7
-  "justice", // 8
-  "hermit", // 9
-  "fortune", // 10
-  "strenght", // 11
-  "hanged", // 12
-  "death", // 13
-  "temperance", // 14
-  "devil", // 15
-  "tower", // 16
-  "star", // 17
-  "moon", // 18
-  "sun", // 19
-  "judgement", // 20
-  "world", // 21
-  "fool", // 22
-];
+type CardName = keyof typeof cardRegistry;
+
+const calculateTarotCards = (day: number, month: number, year: number) => {
+  const cardMap: CardName[] = [
+    "magician",
+    "priestess",
+    "empress",
+    "emperor",
+    "hierophant",
+    "lovers",
+    "chariot",
+    "justice",
+    "hermit",
+    "fortune",
+    "strenght",
+    "hanged",
+    "death",
+    "temperance",
+    "devil",
+    "tower",
+    "star",
+    "moon",
+    "sun",
+    "judgement",
+    "world",
+    "fool",
+  ];
+
+  const adjustCardNumber = (num: number) => {
+    while (num > 22) num -= 22;
+    return num;
+  };
+
+  // 1. Card for Day
+  const dayCardNumber = adjustCardNumber(day);
+  const card1 = cardMap[dayCardNumber - 1];
+
+  // 2. Card for Month
+  const monthCardNumber = adjustCardNumber(month);
+  const card2 = cardMap[monthCardNumber - 1];
+
+  // 3. Card for Year
+  const yearDigits = year.toString().split("").map(Number);
+  const yearSum = adjustCardNumber(
+    yearDigits.reduce((acc, num) => acc + num, 0)
+  );
+  const card3 = cardMap[yearSum - 1];
+
+  // Life Card
+  const allDigits = `${day}${month}${year}`.split("").map(Number);
+  const lifeSum = adjustCardNumber(
+    allDigits.reduce((acc, num) => acc + num, 0)
+  );
+  const lifeCard = cardMap[lifeSum - 1];
+
+  return { card1, card2, card3, lifeCard };
+};
 
 const TPPScreen = () => {
   const { user } = useLocalSearchParams();
   const userData = user ? JSON.parse(user as string) : null;
 
-  const [lifeCardNumber, setLifeCardNumber] = useState<number | null>(null);
+  const [lifeCard, setLifeCard] = useState<CardName>("revers");
+  const [card1, setCard1] = useState<CardName>("revers");
+  const [card2, setCard2] = useState<CardName>("revers");
+  const [card3, setCard3] = useState<CardName>("revers");
 
   useEffect(() => {
-    if (userData?.details?.birthdate) {
-      const birthdate = userData.details.birthdate; // Format: DD.MM.YYYY
-      console.log("Birthdate:", birthdate);
+    if (userData?.details) {
+      const { day, month, year } = userData.details;
+      const { card1, card2, card3, lifeCard } = calculateTarotCards(
+        day,
+        month,
+        year
+      );
 
-      // Split the birthdate into digits
-      const digits = birthdate.replace(/\D/g, "").split("").map(Number);
-      console.log("Digits from birthdate:", digits);
+      setCard1(card1);
+      setCard2(card2);
+      setCard3(card3);
+      setLifeCard(lifeCard);
 
-      // Sum the digits
-      let sum = digits.reduce((acc, num) => acc + num, 0);
-      console.log("Sum of digits:", sum);
-
-      // Reduce sum to 22 or below
-      while (sum > 22) {
-        sum -= 22;
-        console.log("After subtracting 22:", sum);
-      }
-
-      console.log("Final result:", sum);
-      setLifeCardNumber(sum); // Store the result in state
+      console.log(
+        "Card 1:",
+        card1,
+        "Card 2:",
+        card2,
+        "Card 3:",
+        card3,
+        "Life Card:",
+        lifeCard
+      );
     }
   }, [userData]);
-
-  // Determine the card name based on lifeCardNumber
-  const lifeCardName: keyof typeof cardRegistry = lifeCardNumber
-    ? cardMap[lifeCardNumber - 1]
-    : "revers";
 
   return (
     <Screen
@@ -75,7 +109,7 @@ const TPPScreen = () => {
         <View style={$lifeCardContainer}>
           <Text preset="h2" text={userData?.name} />
           <Text preset="h2regular" text={userData?.details.birthdate} />
-          <TarotCard cardName={lifeCardName} />
+          <TarotCard cardName={lifeCard} />
         </View>
         <View style={$lifeGridContainer}>
           <View style={$lifeGridUp}>
@@ -83,9 +117,9 @@ const TPPScreen = () => {
             <TarotCard cardName="revers" imageStyle={$gridCard} />
           </View>
           <View style={$lifeGrid1}>
-            <TarotCard cardName="revers" imageStyle={$gridCard} />
-            <TarotCard cardName="revers" imageStyle={$gridCard} />
-            <TarotCard cardName="revers" imageStyle={$gridCard} />
+            <TarotCard cardName={card1} imageStyle={$gridCard} />
+            <TarotCard cardName={card2} imageStyle={$gridCard} />
+            <TarotCard cardName={card3} imageStyle={$gridCard} />
           </View>
           <View style={$lifeGrid2}>
             <TarotCard cardName="revers" imageStyle={$gridCard} />
