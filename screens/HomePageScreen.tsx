@@ -179,7 +179,7 @@ const HomePageScreen = () => {
         <Text preset="h1" tx="common.header" />
         <View style={$contentContainer}>
           <View style={$cardContainer}>
-            <TarotCard cardName="revers" imageStyle={$welcomeCard} hideLabel />
+            <TarotCard cardName="revers" imageStyle={$welcomeCard} />
           </View>
           <View style={$btnContainer}>
             <Button
