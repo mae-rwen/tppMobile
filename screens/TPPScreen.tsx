@@ -66,8 +66,20 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
   const card13Number = adjustCardNumber(
     card1Number + card4Number + card6Number
   );
+  const card13PlusNumber = adjustCardNumber(card13Number + card1Number);
+  const card13MinusNumber = adjustCardNumber(
+    card13Number > card1Number
+      ? card13Number - card1Number
+      : card1Number - card13Number
+  );
   const card14Number = adjustCardNumber(
     card3Number + card5Number + card6Number
+  );
+  const card14PlusNumber = adjustCardNumber(card14Number + card3Number);
+  const card14MinusNumber = adjustCardNumber(
+    card14Number > card3Number
+      ? card14Number - card3Number
+      : card3Number - card14Number
   );
 
   // Map card numbers to names
@@ -81,7 +93,11 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
   const card8 = cardMap[card8Number - 1];
   const card12 = cardMap[card12Number - 1];
   const card13 = cardMap[card13Number - 1];
+  const card13Plus = cardMap[card13PlusNumber - 1];
+  const card13Minus = cardMap[card13MinusNumber - 1];
   const card14 = cardMap[card14Number - 1];
+  const card14Plus = cardMap[card14PlusNumber - 1];
+  const card14Minus = cardMap[card14MinusNumber - 1];
 
   return {
     lifeCard,
@@ -95,7 +111,11 @@ const calculateTarotCards = (day: string, month: string, year: string) => {
     card8,
     card12,
     card13,
+    card13Plus,
+    card13Minus,
     card14,
+    card14Plus,
+    card14Minus,
   };
 };
 
@@ -113,8 +133,12 @@ const TPPScreen = () => {
   const [card7, setCard7] = useState<CardName>("revers");
   const [card8, setCard8] = useState<CardName>("revers");
   const [card13, setCard13] = useState<CardName>("revers");
+  const [card13Plus, setCard13Plus] = useState<string>("plusik");
+  const [card13Minus, setCard13Minus] = useState<string>("minusik");
   const [card12, setCard12] = useState<CardName>("revers");
   const [card14, setCard14] = useState<CardName>("revers");
+  const [card14Plus, setCard14Plus] = useState<string>("plusik");
+  const [card14Minus, setCard14Minus] = useState<string>("minusik");
 
   useEffect(() => {
     if (userData?.details) {
@@ -131,7 +155,11 @@ const TPPScreen = () => {
         card8,
         card12,
         card13,
+        card13Plus,
+        card13Minus,
         card14,
+        card14Plus,
+        card14Minus,
       } = calculateTarotCards(day, month, year);
 
       setLifeCard(lifeCard);
@@ -145,7 +173,11 @@ const TPPScreen = () => {
       setCard8(card8);
       setCard12(card12);
       setCard13(card13);
+      setCard13Plus(card13Plus);
+      setCard13Minus(card13Minus);
       setCard14(card14);
+      setCard14Plus(card14Plus);
+      setCard14Minus(card14Minus);
     }
   }, [userData]);
 
@@ -168,10 +200,14 @@ const TPPScreen = () => {
           <View style={$mainGridContainer}>
             <View style={$gridRowUp}>
               <View style={$cardView}>
+                <Text preset="xxs" text={`+ ${card13Plus}`} />
+                <Text preset="xxs" text={`- ${card13Minus}`} />
                 <TarotCard cardName={card13} imageStyle={$gridCard} />
                 <Text preset="xs" text="p13" />
               </View>
               <View style={$cardView}>
+                <Text preset="xxs" text={`+ ${card14Plus}`} />
+                <Text preset="xxs" text={`- ${card14Minus}`} />
                 <TarotCard cardName={card14} imageStyle={$gridCard} />
                 <Text preset="xs" text="p14" />
               </View>
@@ -249,13 +285,17 @@ const $lifeCardContainer: ViewStyle = {
 const $lifeCard: ImageStyle = { height: 200, width: 200 };
 
 const $gridContainer: ViewStyle = { flexDirection: "row" };
-const $mainGridContainer: ViewStyle = { gap: spacing.md };
+const $mainGridContainer: ViewStyle = {
+  paddingBottom: spacing.xxl,
+  gap: spacing.md,
+};
 const $gridCard: ImageStyle = { height: 100, width: 100 };
 
 const $gridRowUp: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
 };
+
 const $gridRow1: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-around",
@@ -273,7 +313,6 @@ const $gridRow4: ViewStyle = {
   flexDirection: "row",
   justifyContent: "center",
 };
-
 const $secondGridContainer: ViewStyle = {
   paddingTop: spacing.xxxl,
   gap: spacing.md,
