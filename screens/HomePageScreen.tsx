@@ -155,9 +155,15 @@ const HomePageScreen = () => {
         await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
 
         setSavedTPPData((prevData) => [...prevData, tempTPPData]);
+        const newTPP = tempTPPData;
         setTempTPPData(null);
         setConfirmModalVisible(false);
         setInputTxt("");
+
+        router.push({
+          pathname: "/tpp",
+          params: { user: JSON.stringify(newTPP) },
+        });
       } catch (error) {
         console.error("Error saving TPP data:", error);
       }
