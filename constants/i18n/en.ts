@@ -9,7 +9,7 @@ const en = {
     lineTwo:
       "This method, created by Alla Alicja Chrzanowska is taught in workshops, and the meaning of each item is explained thoroughly during the course.",
     footer: {
-      copyright: "© 2024 Agata R. Thrams",
+      copyright: "© 2025 Agata R. Thrams",
       appVersion: "App-Version",
     },
   },
