@@ -41,6 +41,11 @@ const HomePageScreen = () => {
     name: string;
     details: TPPDetails;
   } | null>(null);
+  const [actionModalVisible, setActionModalVisible] = useState<boolean>(false);
+  const [selectedTPP, setSelectedTPP] = useState<{
+    name: string;
+    details: TPPDetails;
+  } | null>(null);
 
   const router = useRouter();
 
@@ -166,6 +171,29 @@ const HomePageScreen = () => {
     setInputTxt("");
   };
 
+  const handleDataClick = (data: { name: string; details: TPPDetails }) => {
+    setSelectedTPP(data);
+    setActionModalVisible(true);
+  };
+
+  const deleteSingleData = async (name: string) => {
+    try {
+      const existingTPPData = await AsyncStorage.getItem("tppData");
+      if (existingTPPData) {
+        const parsedData: TPPData = JSON.parse(existingTPPData);
+        delete parsedData[name];
+        await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
+        setSavedTPPData((prevData) =>
+          prevData.filter((item) => item.name !== name)
+        );
+      }
+      setActionModalVisible(false);
+      setSelectedTPP(null);
+    } catch (error) {
+      console.error("Error deleting single TPP data:", error);
+    }
+  };
+
   // const showData = async () => {
   //   try {
   //     const storedData = await AsyncStorage.getItem("tppData");
@@ -226,12 +254,7 @@ const HomePageScreen = () => {
                     key={index}
                     preset="filled"
                     text={data.name}
-                    onPress={() => {
-                      router.push({
-                        pathname: "/tpp",
-                        params: { user: JSON.stringify(data) },
-                      });
-                    }}
+                    onPress={() => handleDataClick(data)}
                   />
                 ))
               : null}
@@ -316,6 +339,50 @@ const HomePageScreen = () => {
                 text="Cancel"
                 preset="reversed"
                 onPress={cancelSave}
+                style={{ width: 100 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Data pick modal */}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={actionModalVisible}
+        onRequestClose={() => {
+          setActionModalVisible(false);
+          setSelectedTPP(null);
+        }}
+      >
+        <View style={$modalContainer}>
+          <View style={$modalView}>
+            <Text
+              preset="copy"
+              text={`What do you want to do with ${selectedTPP?.name}?`}
+              style={$modalText}
+            />
+            <View style={$modalBtns}>
+              <Button
+                text="Go to TPP"
+                preset="default"
+                onPress={() => {
+                  setActionModalVisible(false);
+                  router.push({
+                    pathname: "/tpp",
+                    params: { user: JSON.stringify(selectedTPP) },
+                  });
+                }}
+                style={{ width: 100 }}
+              />
+              <Button
+                text="Delete"
+                preset="reversed"
+                onPress={() => {
+                  if (selectedTPP) deleteSingleData(selectedTPP.name);
+                }}
                 style={{ width: 100 }}
               />
             </View>
