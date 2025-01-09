@@ -20,7 +20,7 @@ const pl: Translations = {
     deleteData: "Delete data",
   },
   newTPP: {
-    setNewPortrait: "Set new Portrait",
+    setNewPortrait: "New Portrait",
     modalText: "Who will the be Portrait be for?",
     modalPlaceholder: "Name for the Portrait",
     proceedWithSaving: "Save and proceed",

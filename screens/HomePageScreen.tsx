@@ -31,14 +31,20 @@ const HomePageScreen = () => {
   const [inputTxt, setInputTxt] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [datePickerVisible, setDatePickerVisible] = useState<boolean>(false);
+  const [confirmModalVisible, setConfirmModalVisible] =
+    useState<boolean>(false);
   const [date, setDate] = useState<Date>(new Date());
   const [savedTPPData, setSavedTPPData] = useState<
     { name: string; details: TPPDetails }[]
   >([]);
+  const [tempTPPData, setTempTPPData] = useState<{
+    name: string;
+    details: TPPDetails;
+  } | null>(null);
 
   const router = useRouter();
 
-  const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
+  //  const modalPlaceholder = i18n.translate("newTPP.modalPlaceholder");
 
   // Fetch existing TPP data
   const fetchTPPData = async () => {
@@ -69,13 +75,6 @@ const HomePageScreen = () => {
 
   const proceedWithName = () => {
     setModalVisible(!modalVisible);
-    // console.log(`Proceed with name of ${inputTxt}`);
-    setDatePickerVisible(true);
-  };
-  const proceedWithoutName = () => {
-    setInputTxt("");
-    setModalVisible(!modalVisible);
-    console.log(`Proceed without name`);
     setDatePickerVisible(true);
   };
 
@@ -126,38 +125,63 @@ const HomePageScreen = () => {
       setDate(selectedDate);
       const formattedDate = formatDate(selectedDate);
 
-      // Save the new TPP and retrieve the newest data
-      const newestTPP = await saveNewTPP(inputTxt, formattedDate);
-
-      if (newestTPP) {
-        console.log("Newest saved TPP data:", newestTPP);
-
-        // Add the newest data to the existing savedTPPData state
-        setSavedTPPData((prevData) => [...prevData, newestTPP]);
-      }
-
-      setInputTxt("");
-      setDate(new Date());
-    }
-    setDatePickerVisible(!datePickerVisible);
-  };
-
-  const showData = async () => {
-    try {
-      const storedData = await AsyncStorage.getItem("tppData");
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        //  console.log("All TPP data:", parsedData);
-        Object.entries(parsedData).forEach(([name, details]) => {
-          console.log(`Name: ${name}, Details:`, details);
-        });
-      } else {
-        console.log("No TPP data found.");
-      }
-    } catch (error) {
-      console.error("Error showing TPP data:", error);
+      // Temporary data to confirm
+      const newTPPData = {
+        name: inputTxt,
+        details: {
+          birthdate: formattedDate.formatted,
+          day: formattedDate.dd,
+          month: formattedDate.mm,
+          year: formattedDate.yyyy,
+        },
+      };
+      setTempTPPData(newTPPData);
+      setDatePickerVisible(!datePickerVisible);
+      setConfirmModalVisible(true);
     }
   };
+
+  const confirmSave = async () => {
+    if (tempTPPData) {
+      try {
+        const existingTPPData = await AsyncStorage.getItem("tppData");
+        const parsedData = existingTPPData ? JSON.parse(existingTPPData) : {};
+        parsedData[tempTPPData.name] = tempTPPData.details;
+        await AsyncStorage.setItem("tppData", JSON.stringify(parsedData));
+
+        setSavedTPPData((prevData) => [...prevData, tempTPPData]);
+        setTempTPPData(null);
+        setConfirmModalVisible(false);
+        setInputTxt("");
+      } catch (error) {
+        console.error("Error saving TPP data:", error);
+      }
+    }
+  };
+
+  const cancelSave = () => {
+    setTempTPPData(null);
+    setConfirmModalVisible(false);
+    setModalVisible(true);
+    setInputTxt("");
+  };
+
+  // const showData = async () => {
+  //   try {
+  //     const storedData = await AsyncStorage.getItem("tppData");
+  //     if (storedData) {
+  //       const parsedData = JSON.parse(storedData);
+  //       //  console.log("All TPP data:", parsedData);
+  //       Object.entries(parsedData).forEach(([name, details]) => {
+  //         console.log(`Name: ${name}, Details:`, details);
+  //       });
+  //     } else {
+  //       console.log("No TPP data found.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error showing TPP data:", error);
+  //   }
+  // };
 
   const deleteData = async () => {
     try {
@@ -176,7 +200,7 @@ const HomePageScreen = () => {
       contentContainerStyle={$root}
     >
       <View style={$container}>
-        <Text preset="h1" tx="common.header" />
+        <Text preset="h1" text="Tarot App" />
         <View style={$contentContainer}>
           <View style={$cardContainer}>
             <TarotCard cardName="revers" imageStyle={$welcomeCard} />
@@ -184,19 +208,25 @@ const HomePageScreen = () => {
           <View style={$btnContainer}>
             <Button
               preset="default"
-              tx="newTPP.setNewPortrait"
+              text="New Portrait"
               onPress={() => setModalVisible(true)}
             />
+
+            <Button
+              preset="reversed"
+              text="Delete all data"
+              onPress={deleteData}
+            />
           </View>
+          <Text preset="h2" text="Saved Portraits" />
           <View style={$savedDataBtnContainer}>
             {savedTPPData.length > 0
               ? savedTPPData.map((data, index) => (
                   <Button
                     key={index}
                     preset="filled"
-                    text={`${data.name} - ${data.details.birthdate}`}
+                    text={data.name}
                     onPress={() => {
-                      console.log(`Details for ${data.name}:`, data.details);
                       router.push({
                         pathname: "/tpp",
                         params: { user: JSON.stringify(data) },
@@ -205,24 +235,6 @@ const HomePageScreen = () => {
                   />
                 ))
               : null}
-            <Button
-              preset="default"
-              tx="birthdata.showData"
-              onPress={showData}
-            />
-            <Button
-              preset="default"
-              tx="birthdata.deleteData"
-              onPress={deleteData}
-            />
-
-            <Button
-              preset="reversed"
-              text=">>"
-              onPress={() => {
-                router.push("/tpp");
-              }}
-            />
           </View>
         </View>
       </View>
@@ -238,28 +250,26 @@ const HomePageScreen = () => {
       >
         <View style={$modalContainer}>
           <View style={$modalView}>
-            <Text preset="copy" tx="newTPP.modalText" style={$modalText} />
+            <Text
+              preset="copy"
+              text="Who will be the Portrait for?"
+              style={$modalText}
+            />
             <TextInput
               style={$txtInput}
               onChangeText={setInputTxt}
               value={inputTxt}
               textAlign="center"
-              placeholder={modalPlaceholder}
+              placeholder="Name for the TPP"
               placeholderTextColor={colors.palette.accent300}
             />
             <View style={$modalBtns}>
               <Button
-                tx="newTPP.proceedWithSaving"
-                preset="filled"
+                text="Save and proceed"
+                preset={inputTxt === "" ? "default" : "filled"}
                 onPress={proceedWithName}
                 style={{ width: 100 }}
-              />
-              <Button
-                tx="newTPP.proceedWitouthSaving"
-                preset="default"
-                onPress={proceedWithoutName}
-                style={{ width: 100 }}
-                disabled
+                disabled={inputTxt === ""}
               />
             </View>
           </View>
@@ -271,6 +281,47 @@ const HomePageScreen = () => {
       {datePickerVisible && (
         <DatePicker value={date} onChange={onDateChange} mode="date" />
       )}
+
+      {/* Modal for confirmation */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={confirmModalVisible}
+        onRequestClose={() => {
+          setTempTPPData(null);
+          setConfirmModalVisible(!confirmModalVisible);
+          setInputTxt("");
+        }}
+      >
+        <View style={$modalContainer}>
+          <View style={$modalView}>
+            <Text
+              preset="copy"
+              text="Do you want to save this data?"
+              style={$modalText}
+            />
+            <Text
+              preset="copy"
+              text={`Name: ${tempTPPData?.name}\nDate of Birth: ${tempTPPData?.details.birthdate}`}
+              style={$modalText}
+            />
+            <View style={$modalBtns}>
+              <Button
+                text="Save"
+                preset="default"
+                onPress={confirmSave}
+                style={{ width: 100 }}
+              />
+              <Button
+                text="Cancel"
+                preset="reversed"
+                onPress={cancelSave}
+                style={{ width: 100 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 };
@@ -298,11 +349,15 @@ const $cardContainer: ViewStyle = {
 };
 
 const $welcomeCard: ImageStyle = {
-  height: 500,
+  height: 350,
 };
 
 const $btnContainer: ViewStyle = {
   marginVertical: spacing.xl,
+  flexDirection: "row",
+  gap: spacing.sm,
+  flexWrap: "wrap",
+  justifyContent: "center",
 };
 
 const $savedDataBtnContainer: ViewStyle = {
@@ -310,6 +365,8 @@ const $savedDataBtnContainer: ViewStyle = {
   gap: spacing.sm,
   flexWrap: "wrap",
   justifyContent: "center",
+  marginTop: spacing.md,
+  alignItems: "baseline",
 };
 
 const $modalContainer: ViewStyle = {
