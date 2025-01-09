@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tarotPortraitMobile",
-    "slug": "tarotPortraitMobile",
+    "name": "Tarot App",
+    "slug": "tarotApp",
     "scheme": "tarot-portrait-mobile-scheme",
     "version": "1.0.0",
     "orientation": "portrait",
