@@ -252,7 +252,9 @@ const HomePageScreen = () => {
               onPress={deleteData}
             />
           </View>
-          <Text preset="h2" text="Saved Portraits" />
+          {savedTPPData.length > 0 && (
+            <Text preset="h2" text="Saved Portraits" />
+          )}
           <View style={$savedDataBtnContainer}>
             {savedTPPData.length > 0
               ? savedTPPData.map((data, index) => (

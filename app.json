@@ -22,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.agatart.tarotApp"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +32,14 @@
     "plugins": [
       "expo-router",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "910caa00-9f0f-4d81-9320-c7ec1d299e2a"
+      }
+    }
   }
 }
